@@ -6,6 +6,9 @@ import os
 from fastapi.staticfiles import StaticFiles
 import jwt
 import bcrypt
+from dotenv import load_dotenv
+
+load_dotenv
 
 app=FastAPI()
 SECRET_KEY="brn"
@@ -31,7 +34,8 @@ class User(BaseModel):
 
 def check_connection():
     try:
-        client = MongoClient("mongodb+srv://vemulajyothi24_db_user:pythonbatch@pythonbatch.xpkdkez.mongodb.net/?appName=pythonbatch")
+        mongo_url = os.getenv("MONGO_URL")
+        client = MongoClient(mongo_url)
 
         db = client["post"]
         collection = db["postUsers"]
@@ -237,4 +241,19 @@ async def delete_profile(email:str=Form(...)):
         return {"status":"Success","msg":"User Deleted Successfully"}
     else:
        return {"status":"Failure","msg":"Nothing is deleted"}    
-     
+
+app.mount(
+    "/",
+    StaticFiles(directory="client/build", html=True),
+    name="client"
+)
+
+# SPA fallback (VERY IMPORTANT for React routing)
+@app.get("/{full_path:path}")
+async def spa_fallback(full_path: str):
+    return FileResponse("client/build/index.html")
+
+
+# Run server
+if __name__ == "__main__":
+    uvicorn.run(app, host="localhost", port=8000)     
