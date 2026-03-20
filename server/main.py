@@ -7,17 +7,20 @@ from fastapi.staticfiles import StaticFiles
 import jwt
 import bcrypt
 from dotenv import load_dotenv
+from fastapi.responses import FileResponse
 
-load_dotenv
+load_dotenv()
 
 app=FastAPI()
 SECRET_KEY="brn"
+
+os.makedirs("uploads", exist_ok=True)
 
 app.mount("/uploads",StaticFiles(directory="uploads"),name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"]
 )
